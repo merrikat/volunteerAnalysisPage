@@ -1,0 +1,160 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css">
+</head>
+
+<body>
+    <input type="file" onchange="loadFile()" />
+    <input type="button" onclick="removeTable();" value="Clear table"/>
+
+    <script>
+        function removeTable()
+    {
+        $("#table tr").remove(); 
+    }
+
+
+        var reader = new FileReader();
+        var data;
+
+        $("#search").keyup(function() {
+            _this = this;
+            // Show only matching TR, hide rest of them
+            $.each($("#table tbody tr"), function() {
+                if ($(this).text().toLowerCase().indexOf($(_this).val().toLowerCase()) === -1)
+                    $(this).hide();
+                else
+                    $(this).show();
+            });
+        });
+
+        function loadFile() {
+            var file = document.querySelector('input[type=file]').files[0];
+            reader.addEventListener("load", parseFile, false);
+            if (file) {
+                reader.readAsText(file);
+            }
+        }
+
+        var flattenObject = function(ob) {
+            var toReturn = {};
+
+            for (var i in ob) {
+                if (!ob.hasOwnProperty(i)) continue;
+
+                if ((typeof ob[i]) == 'object') {
+                    var flatObject = flattenObject(ob[i]);
+                    for (var x in flatObject) {
+                        if (!flatObject.hasOwnProperty(x)) continue;
+
+                        toReturn[i + '.' + x] = flatObject[x];
+                    }
+                } else {
+                    toReturn[i] = ob[i];
+                }
+            }
+            return toReturn;
+        };
+
+        function toTitleCase(str) {
+            return str.replace(/\w\S*/g, function(txt) {
+                return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+            });
+        }
+
+        function parseFile() {
+            var rawdata = d3.csv.parse(reader.result);
+
+            var data = d3.nest()
+                .key(function(d) {
+                    return d["First name"] + " " + d["Last name"]
+                })
+                .key(function(d) {
+                    return d.Email
+                })
+                .key(function(d) {
+                    return d.Phone
+                })
+                .rollup(function(d) {
+                    return d.length
+                })
+                .key(function(d) {
+                    return d.Opportunity
+                })
+                .entries(rawdata);
+
+            var columns = ["Name", "Email", "Phone", "Number of opps", "Opportunities"];
+
+            var table = d3.select("#r2b2").append("table").attr("class", "display").attr("id", "table"),
+                thead = table.append("thead"),
+                tbody = table.append("tbody");
+
+            thead.append("tr")
+                .selectAll("th")
+                .data(columns)
+                .enter()
+                .append("th")
+                .text(function(column) {
+                    return column;
+                });
+
+
+            var tds = [];
+            data.forEach(function(d) {
+                var innerTd = {};
+                innerTd["Name"] = toTitleCase(d.key);
+                if (d.values.length > 0) {
+                    d.values.forEach(function(g) {
+                        innerTd["Email"] = g.key;
+                        g.values.forEach(function(c) {
+                            innerTd["Phone"] = "0" + c.key;
+                            innerTd["Number of opps"] = c.values.length;
+                            //console.log(c.values)
+                            //var arr = $.map(obj, function(el) { return el });
+                            innerTd["Opportunities"] = $.map(c.values, function(el) {
+                                return el.key
+                            });
+                            tds.push(innerTd);
+                        })
+                    });
+                }
+            });
+            // create a row for each object in the data
+            var rows = tbody.selectAll("tr")
+                //.data(data)
+                .data(tds)
+                .enter()
+                .append("tr");
+
+            // create a cell in each row for each column
+            var cells = rows.selectAll("td")
+                .data(function(row) {
+                    return columns.map(function(column) {
+                        return {
+                            column: column,
+                            value: row[column]
+                        };
+                    });
+                })
+                .enter()
+                .append("td")
+                .text(function(d) {
+                    return d.value;
+                });
+
+            $(document).ready(function() {
+                $('#table').DataTable();
+            });
+        }
+    </script>
+    <div class="pure-g-r box_main" id="r2b2"></div>
+
+</body>
+
+</html>
