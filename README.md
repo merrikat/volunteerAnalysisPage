@@ -17,7 +17,7 @@ where the *Opportunities* column is just all the things they applied for all smu
 
 ## Maintainers
 
-merrikat - apologies in advance
+merrikat - apologies in advance.
 
 ## License
 
