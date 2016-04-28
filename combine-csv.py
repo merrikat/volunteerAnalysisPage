@@ -2,6 +2,7 @@
 Combine .csv files into a single .csv file with all fields
 
 2013-Nov-25 by Robert Woodhead, trebor@animeigo.com
+2016-Apr by merrikat
 
 Usage:
 
@@ -25,7 +26,7 @@ Output:
 	.csv containing all the records, shuffling fields to match the global
 	header fields. Combines contents of duplicate fields using a | delimiter.
 
-	Adds either a source file field or a count field (with definable name) to each line.
+	Adds either a file name field or a count field (with definable name) to each line.
 
 """
 
@@ -135,7 +136,7 @@ if __name__ == '__main__':
 						else:
 							counts[newRow] = 1
 					else:
-						newRow.append(filename)
+						newRow.append(os.path.splitext(os.path.basename(filename))[0].title())
 						csvOut.writerow(newRow)
 
 		# if doing counts, output newRow
