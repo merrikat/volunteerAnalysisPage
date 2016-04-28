@@ -7,17 +7,48 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.11/css/jquery.dataTables.min.css">
+    <style>
+        .spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            margin-left: -50px;
+            /* half width of the spinner gif */
+            margin-top: -50px;
+            /* half height of the spinner gif */
+            text-align: center;
+            z-index: 1234;
+            overflow: auto;
+            width: 200px;
+            /* width of the spinner gif */
+            height: 202px;
+            /*hight of the spinner gif +2px to fix IE8 issue */
+        }
+    </style>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#spinner").bind("ajaxSend", function() {
+                $(this).show();
+            }).bind("ajaxStop", function() {
+                $(this).hide();
+            }).bind("ajaxError", function() {
+                $(this).hide();
+            });
+
+        });
+    </script>
+
 </head>
 
 <body>
-    <input type="file" onchange="loadFile()" />
-    <input type="button" onclick="removeTable();" value="Clear table"/>
+    <input type="file" onchange="loadFile()" id="loadButton" />
+    <input type="button" onclick="removeTable();" value="Clear table" />
 
     <script>
-        function removeTable()
-    {
-        $("#table tr").remove(); 
-    }
+        function removeTable() {
+            $("#table tr").remove();
+        }
 
 
         var reader = new FileReader();
@@ -34,7 +65,13 @@
             });
         });
 
+
         function loadFile() {
+
+            $(document).ready(function() {
+                $('#spinner').show();
+            });
+
             var file = document.querySelector('input[type=file]').files[0];
             reader.addEventListener("load", parseFile, false);
             if (file) {
@@ -151,10 +188,13 @@
             $(document).ready(function() {
                 $('#table').DataTable();
             });
+            $('#spinner').hide();
         }
     </script>
     <div class="pure-g-r box_main" id="r2b2"></div>
-
+    <div id="spinner" class="spinner" style="display:none;">
+        <p>Please wait while data loads</p>
+    </div>
 </body>
 
 </html>
