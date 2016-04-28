@@ -15,6 +15,10 @@ The input data includes every application made, so applicants are generally list
 
 where the *Opportunities* column is just all the things they applied for all smushed together in one column.
 
+## combine-csv.py
+
+Merges all CSV files in a specific folder. Adapted from [MadOverlord](http://rjwoodhead.blogspot.co.uk/2014/02/clever-combining-csv-files-to-correct.html).  
+
 ## Maintainers
 
 merrikat - apologies in advance.
